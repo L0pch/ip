@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Gepit {
@@ -16,8 +17,7 @@ public class Gepit {
             ____________________________________________________________
             """;
 
-    private static final Task[] tasks = new Task[100];
-    private static int taskCount = 0;
+    private static final ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
         System.out.println(INTRO_MESSAGE);
@@ -40,8 +40,8 @@ public class Gepit {
                 //print list
                 if (input.equals("list")) {
                     String taskOutput = "";
-                    for (int i = 0; i < taskCount; i++) {
-                        Task task = tasks[i];
+                    for (int i = 0; i < tasks.size(); i++) {
+                        Task task = tasks.get(i);
                         taskOutput = taskOutput + "\n" + (i + 1) + ". " + task;
                     }
                     System.out.println(BAR + taskOutput + "\n" + BAR);
@@ -58,7 +58,7 @@ public class Gepit {
                     }
 
                     int index = getTaskIndex(parts[1]);
-                    System.out.println(markTask(tasks[index]));
+                    System.out.println(markTask(tasks.get(index)));
                     continue;
                 }
 
@@ -68,7 +68,7 @@ public class Gepit {
                     }
 
                     int index = getTaskIndex(parts[1]);;
-                    System.out.println(unmarkTask(tasks[index]));
+                    System.out.println(unmarkTask(tasks.get(index)));
                     continue;
                 }
 
@@ -128,13 +128,12 @@ public class Gepit {
 
     private static final String GOTIT = BAR + "\n Got it. task added" + "\n     ";
     private static String getTaskCountMessage() {
-        return "\n " + "Now you have " + taskCount + " tasks in the list\n" + BAR;
+        return "\n " + "Now you have " + tasks.size() + " tasks in the list\n" + BAR;
     }
 
     private static void addTodo(String input) {
-        tasks[taskCount] = new Todo(input);
-        taskCount++;
-        System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
+        tasks.add(new Todo(input));
+        System.out.println(GOTIT + tasks.get(tasks.size() - 1).toString() + getTaskCountMessage());
     }
 
     private static void addDeadline(String input) throws GepitException {
@@ -151,9 +150,8 @@ public class Gepit {
 
         String descr = parts[0];
         String by = parts[1];
-        tasks[taskCount] = new Deadline(descr, by);
-        taskCount++;
-        System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
+        tasks.add(new Deadline(descr, by));
+        System.out.println(GOTIT + tasks.get(tasks.size() - 1).toString() + getTaskCountMessage());
     }
 
     private static void addEvent(String input) throws GepitException {
@@ -180,9 +178,8 @@ public class Gepit {
 
         String start = eventDuration[0];
         String end = eventDuration[1];
-        tasks[taskCount] = new Event(descr, start, end);
-        taskCount++;
-        System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
+        tasks.add(new Event(descr, start, end));
+        System.out.println(GOTIT + tasks.get(tasks.size() - 1).toString() + getTaskCountMessage());
     }
 
     //to validate index Strings and return correct task array index
@@ -198,7 +195,7 @@ public class Gepit {
         }
 
         int index = taskNum - 1;
-        if (index < 0 || index >= taskCount) {
+        if (index < 0 || index >= tasks.size()) {
             throw new GepitException(
                     "Task " + taskNum + " doesn't exist"
             );
