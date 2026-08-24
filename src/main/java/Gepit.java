@@ -16,7 +16,7 @@ public class Gepit {
             ____________________________________________________________
             """;
 
-    private static final String[] tasks = new String[100];
+    private static final Task[] tasks = new Task[100];
     private static int taskCount = 0;
 
     public static void main(String[] args) {
@@ -30,21 +30,40 @@ public class Gepit {
         while (scanner.hasNextLine()) {
             String input = scanner.nextLine();
 
+            // exit
             if (input.equals("bye")) {
                 return;
             }
 
+            //print list
             if (input.equals("list")) {
                 String taskOutput = "";
                 for (int i = 0; i < taskCount; i++) {
-                    String task = tasks[i];
+                    Task task = tasks[i];
                     taskOutput = taskOutput + "\n" + (i + 1) + ". " + task;
                 }
                 System.out.println(BAR + taskOutput + "\n" + BAR);
                 continue;
             }
 
-            tasks[taskCount] = input;
+            //split input
+            String[] parts = input.split(" ", 2);
+
+            if (parts[0].equals("mark")) {
+                int index = Integer.parseInt(parts[1]) - 1;
+                System.out.println(markTask(tasks[index]));
+
+                continue;
+            }
+
+            if (parts[0].equals("unmark")) {
+                int index = Integer.parseInt(parts[1]) - 1;
+                System.out.println(unmarkTask(tasks[index]));
+
+                continue;
+            }
+
+            tasks[taskCount] = new Task(input);
             taskCount++;
 
             String output = BAR + "\n" +
@@ -53,5 +72,19 @@ public class Gepit {
 
             System.out.println(output);
         }
+    }
+
+    private static String markTask(Task task) {
+        task.markDone();
+        return BAR + "\n Gr8 job it's done mate" +
+                "\n     " + task.toString() +
+                "\n" + BAR;
+    }
+
+    private static String unmarkTask(Task task) {
+        task.markNotDone();
+        return BAR + "\n Get to it soon bruv" +
+                "\n     " + task.toString() +
+                "\n" + BAR;
     }
 }
