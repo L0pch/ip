@@ -52,6 +52,20 @@ public class Gepit {
                 String[] parts = input.split(" ", 2);
                 String cmd = parts[0];
 
+                if (cmd.equals("delete")) {
+                    if (parts.length < 2) {
+                        throw new GepitException("You want me to delete everything?? or would you rather specify which");
+                    }
+
+                    int index = getTaskIndex(parts[1]);
+                    Task task = tasks.remove(index);
+                    String output = BAR + "\n I've done it boss. Deleted this guy:" +
+                            "\n     " + task.toString() + getTaskCountMessage();
+                    System.out.println(output);
+
+                    continue;
+                }
+
                 if (cmd.equals("mark")) {
                     if (parts.length < 2) {
                         throw new GepitException("Bruv tell me which index to mark??");
@@ -67,7 +81,7 @@ public class Gepit {
                         throw new GepitException("Bruv tell me which index to unmark??");
                     }
 
-                    int index = getTaskIndex(parts[1]);;
+                    int index = getTaskIndex(parts[1]);
                     System.out.println(unmarkTask(tasks.get(index)));
                     continue;
                 }
