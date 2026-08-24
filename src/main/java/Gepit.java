@@ -52,25 +52,29 @@ public class Gepit {
             if (parts[0].equals("mark")) {
                 int index = Integer.parseInt(parts[1]) - 1;
                 System.out.println(markTask(tasks[index]));
-
                 continue;
             }
 
             if (parts[0].equals("unmark")) {
                 int index = Integer.parseInt(parts[1]) - 1;
                 System.out.println(unmarkTask(tasks[index]));
-
                 continue;
             }
 
-            tasks[taskCount] = new Task(input);
-            taskCount++;
+            if (parts[0].equals("todo")) {
+                addTodo(parts[1]);
+                continue;
+            }
 
-            String output = BAR + "\n" +
-                    "added: " + input +
-                    "\n" + BAR;
+            if (parts[0].equals("deadline")) {
+                addDeadline(parts[1]);
+                continue;
+            }
 
-            System.out.println(output);
+            if (parts[0].equals("event")) {
+                addEvent(parts[1]);
+                continue;
+            }
         }
     }
 
@@ -86,5 +90,37 @@ public class Gepit {
         return BAR + "\n Get to it soon bruv" +
                 "\n     " + task.toString() +
                 "\n" + BAR;
+    }
+
+
+    private static final String GOTIT = BAR + "\n Got it. task added" + "\n     ";
+    private static String getTaskCountMessage() {
+        return "\n " + "Now you have " + taskCount + " tasks in the list\n" + BAR;
+    }
+
+    private static void addTodo(String input) {
+        tasks[taskCount] = new Todo(input);
+        taskCount++;
+        System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
+    }
+
+    private static void addDeadline(String input) {
+        String[] parts = input.split(" /by ", 2);
+        String descr = parts[0];
+        String by = parts[1];
+        tasks[taskCount] = new Deadline(descr, by);
+        taskCount++;
+        System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
+    }
+
+    private static void addEvent(String input) {
+        String[] parts = input.split(" /from ", 2);
+        String descr = parts[0];
+        String[] eventDuration = parts[1].split(" /to ", 2);
+        String start = eventDuration[0];
+        String end = eventDuration[1];
+        tasks[taskCount] = new Event(descr, start, end);
+        taskCount++;
+        System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
     }
 }
