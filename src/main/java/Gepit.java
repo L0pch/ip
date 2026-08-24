@@ -25,55 +25,88 @@ public class Gepit {
         System.out.println(GOODBYE_MESSAGE);
     }
 
+    //handles where the input gets sent to for further handling
     private static void runChatBot() {
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String input = scanner.nextLine();
 
-            // exit
-            if (input.equals("bye")) {
-                return;
-            }
-
-            //print list
-            if (input.equals("list")) {
-                String taskOutput = "";
-                for (int i = 0; i < taskCount; i++) {
-                    Task task = tasks[i];
-                    taskOutput = taskOutput + "\n" + (i + 1) + ". " + task;
+            try {
+                // exit
+                if (input.equals("bye")) {
+                    return;
                 }
-                System.out.println(BAR + taskOutput + "\n" + BAR);
-                continue;
-            }
 
-            //split input
-            String[] parts = input.split(" ", 2);
+                //print list
+                if (input.equals("list")) {
+                    String taskOutput = "";
+                    for (int i = 0; i < taskCount; i++) {
+                        Task task = tasks[i];
+                        taskOutput = taskOutput + "\n" + (i + 1) + ". " + task;
+                    }
+                    System.out.println(BAR + taskOutput + "\n" + BAR);
+                    continue;
+                }
 
-            if (parts[0].equals("mark")) {
-                int index = Integer.parseInt(parts[1]) - 1;
-                System.out.println(markTask(tasks[index]));
-                continue;
-            }
+                //split input
+                String[] parts = input.split(" ", 2);
+                String cmd = parts[0];
 
-            if (parts[0].equals("unmark")) {
-                int index = Integer.parseInt(parts[1]) - 1;
-                System.out.println(unmarkTask(tasks[index]));
-                continue;
-            }
+                if (cmd.equals("mark")) {
+                    if (parts.length < 2) {
+                        throw new GepitException("Bruv tell me which index to mark??");
+                    }
 
-            if (parts[0].equals("todo")) {
-                addTodo(parts[1]);
-                continue;
-            }
+                    int index = getTaskIndex(parts[1]);
+                    System.out.println(markTask(tasks[index]));
+                    continue;
+                }
 
-            if (parts[0].equals("deadline")) {
-                addDeadline(parts[1]);
-                continue;
-            }
+                if (cmd.equals("unmark")) {
+                    if (parts.length < 2) {
+                        throw new GepitException("Bruv tell me which index to unmark??");
+                    }
 
-            if (parts[0].equals("event")) {
-                addEvent(parts[1]);
-                continue;
+                    int index = getTaskIndex(parts[1]);;
+                    System.out.println(unmarkTask(tasks[index]));
+                    continue;
+                }
+
+                if (cmd.equals("todo")) {
+                    if (parts.length < 2 || parts[1].isBlank()) {
+                        throw new GepitException("todo needs a description mate");
+                    }
+
+                    addTodo(parts[1]);
+                    continue;
+                }
+
+                if (cmd.equals("deadline")) {
+                    if (parts.length < 2 || parts[1].isBlank()) {
+                        throw new GepitException("a deadline needs a description and /by date and(or) time");
+                    }
+
+                    addDeadline(parts[1]);
+                    continue;
+                }
+
+                if (cmd.equals("event")) {
+                    if (parts.length < 2 || parts[1].isBlank()) {
+                        throw new GepitException("an event needs a description, /from and /to date and(or) time");
+                    }
+
+                    addEvent(parts[1]);
+                    continue;
+                }
+
+                throw new GepitException(
+                        "Sorry m8, IDK what " + cmd + " is supposed to mean"
+                );
+
+            } catch (GepitException e) {
+                System.out.println(BAR);
+                System.out.println(e.getMessage());
+                System.out.println(BAR);
             }
         }
     }
@@ -104,8 +137,18 @@ public class Gepit {
         System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
     }
 
-    private static void addDeadline(String input) {
+    private static void addDeadline(String input) throws GepitException {
         String[] parts = input.split(" /by ", 2);
+
+        if (parts.length < 2
+                || parts[0].isBlank()
+                || parts[1].isBlank()) {
+            throw new GepitException(
+                    "A deadline should look like:"
+                    + "\ndeadline return book /by Sunday"
+            );
+        }
+
         String descr = parts[0];
         String by = parts[1];
         tasks[taskCount] = new Deadline(descr, by);
@@ -113,14 +156,54 @@ public class Gepit {
         System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
     }
 
-    private static void addEvent(String input) {
+    private static void addEvent(String input) throws GepitException {
         String[] parts = input.split(" /from ", 2);
+
+        if (parts.length < 2
+                || parts[0].isBlank()) {
+            throw new GepitException(
+                    "An event must have descr and /from"
+            );
+        }
+
         String descr = parts[0];
         String[] eventDuration = parts[1].split(" /to ", 2);
+
+        if (eventDuration.length < 2
+                || eventDuration[0].isBlank()
+                || eventDuration[1].isBlank()) {
+            throw new GepitException(
+                    "An event should look like:"
+                            + "\nevent meeting /from Mon 2pm /to 4pm"
+            );
+        }
+
         String start = eventDuration[0];
         String end = eventDuration[1];
         tasks[taskCount] = new Event(descr, start, end);
         taskCount++;
         System.out.println(GOTIT + tasks[taskCount - 1].toString() + getTaskCountMessage());
+    }
+
+    //to validate index Strings and return correct task array index
+    private static int getTaskIndex(String input) throws GepitException {
+        int taskNum;
+
+        try {
+            taskNum = Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            throw new GepitException(
+                    "" + input + " isn't a valid task number"
+            );
+        }
+
+        int index = taskNum - 1;
+        if (index < 0 || index >= taskCount) {
+            throw new GepitException(
+                    "Task " + taskNum + " doesn't exist"
+            );
+        }
+
+        return index;
     }
 }
