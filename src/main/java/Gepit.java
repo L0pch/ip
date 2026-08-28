@@ -23,18 +23,20 @@ public class Gepit {
             ____________________________________________________________
             """;
 
-    private static final ArrayList<Task> tasks = new ArrayList<>();
-    private static final Path DATA_FILE = Path.of("data", "gepit.txt");
+    private static TaskList tasks = new TaskList();
+    private static final Storage storage =
+            new Storage("data/gepit.txt");
 
     public static void main(String[] args) {
         System.out.println(INTRO_MESSAGE);
 
         try {
-            loadTasks();
+            tasks = new TaskList(storage.load());
         } catch (GepitException e) {
             System.out.println(BAR);
             System.out.println(e.getMessage());
             System.out.println(BAR);
+            tasks = new TaskList();
         }
 
         runChatBot();
@@ -138,7 +140,7 @@ public class Gepit {
 
     private static String deleteTask(int index) throws GepitException {
         Task task = tasks.remove(index);
-        saveTasks();
+        storage.save(tasks);
 
         return BAR + "\n I've done it boss. Deleted this guy:"
                 + "\n     " + task
@@ -147,7 +149,7 @@ public class Gepit {
 
     private static String markTask(Task task) throws GepitException {
         task.markDone();
-        saveTasks();
+        storage.save(tasks);
 
         return BAR + "\n Gr8 job it's done mate"
                 + "\n     " + task
@@ -156,7 +158,7 @@ public class Gepit {
 
     private static String unmarkTask(Task task) throws GepitException {
         task.markNotDone();
-        saveTasks();
+        storage.save(tasks);
 
         return BAR + "\n Get to it soon bruv"
                 + "\n     " + task
@@ -172,7 +174,7 @@ public class Gepit {
     private static void addTodo(String description) throws GepitException {
         Task task = new Todo(description);
         tasks.add(task);
-        saveTasks();
+        storage.save(tasks);
 
         System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
@@ -200,7 +202,7 @@ public class Gepit {
 
         Task task = new Deadline(description, by);
         tasks.add(task);
-        saveTasks();
+        storage.save(tasks);
 
         System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
@@ -244,7 +246,7 @@ public class Gepit {
 
         Task task = new Event(description, start, end);
         tasks.add(task);
-        saveTasks();
+        storage.save(tasks);
 
         System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
@@ -268,101 +270,5 @@ public class Gepit {
         }
 
         return index;
-    }
-
-    private static void saveTasks() throws GepitException {
-        try {
-            Files.createDirectories(DATA_FILE.getParent());
-
-            List<String> lines = new ArrayList<>();
-
-            for (Task task : tasks) {
-                lines.add(task.toDataString());
-            }
-
-            Files.write(DATA_FILE, lines);
-
-        } catch (IOException e) {
-            throw new GepitException("I couldn't save your tasks, only God is able to");
-        }
-    }
-
-    private static void loadTasks() throws GepitException {
-        if (!Files.exists(DATA_FILE)) {
-            return;
-        }
-
-        try {
-            List<String> lines = Files.readAllLines(DATA_FILE);
-            ArrayList<Task> loadedTasks = new ArrayList<>();
-
-            for (String line : lines) {
-                if (line.isBlank()) {
-                    continue;
-                }
-
-                loadedTasks.add(parseSavedTask(line));
-            }
-
-            tasks.addAll(loadedTasks);
-        } catch (IOException e) {
-            throw new GepitException("I couldn't load your saved tasks.");
-        }
-    }
-
-    private static Task parseSavedTask(String line) throws GepitException {
-        String[] parts = line.split(" \\| ");
-
-        if (parts.length < 3) {
-            throw new GepitException("Invalid task data: " + line);
-        }
-
-        String type = parts[0];
-        String doneValue = parts[1];
-        String description = parts[2];
-
-        if (!doneValue.equals("0") && !doneValue.equals("1")) {
-            throw new GepitException("Invalid task status in saved data: " + line);
-        }
-
-        Task task;
-
-        try {
-            switch (type) {
-                case "T":
-                    if (parts.length != 3) {
-                        throw new GepitException("Invalid todo data: " + line);
-                    }
-                    task = new Todo(description);
-                    break;
-
-                case "D":
-                    if (parts.length != 4) {
-                        throw new GepitException("Invalid deadline data: " + line);
-                    }
-                    task = new Deadline(description, LocalDate.parse(parts[3]));
-                    break;
-
-                case "E":
-                    if (parts.length != 5) {
-                        throw new GepitException("Invalid event data: " + line);
-                    }
-                    task = new Event(description,
-                            LocalDate.parse(parts[3]),
-                            LocalDate.parse(parts[4]));
-                    break;
-
-                default:
-                    throw new GepitException("Unknown task type in saved data: " + type);
-            }
-        } catch (DateTimeParseException e) {
-            throw new GepitException("Invalid date in saved task: " + line);
-        }
-
-        if (doneValue.equals("1")) {
-            task.markDone();
-        }
-
-        return task;
     }
 }
