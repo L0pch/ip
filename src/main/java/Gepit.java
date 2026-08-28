@@ -1,11 +1,3 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 public class Gepit {
     private static final Ui ui = new Ui();
@@ -64,68 +56,61 @@ public class Gepit {
                 }
 
                 //split input
-                String[] parts = input.split(" ", 2);
-                String cmd = parts[0];
+                String command = Parser.getCommand(input);
 
-                if (cmd.equals("delete")) {
-                    if (parts.length < 2) {
-                        throw new GepitException("You want me to delete everything?? or would you rather specify which");
-                    }
+                if (command.equals("delete")) {
+                    String argument = Parser.getArgument(input);
+                    int taskNumber = Parser.parseTaskNumber(argument);
+                    int index = getTaskIndex(taskNumber);
 
-                    int index = getTaskIndex(parts[1]);
                     ui.showMessage(deleteTask(index));
                     continue;
                 }
 
-                if (cmd.equals("mark")) {
-                    if (parts.length < 2) {
-                        throw new GepitException("Bruv tell me which index to mark??");
-                    }
+                if (command.equals("mark")) {
+                    String argument = Parser.getArgument(input);
+                    int taskNumber = Parser.parseTaskNumber(argument);
+                    int index = getTaskIndex(taskNumber);
 
-                    int index = getTaskIndex(parts[1]);
                     ui.showMessage(markTask(tasks.get(index)));
                     continue;
                 }
 
-                if (cmd.equals("unmark")) {
-                    if (parts.length < 2) {
-                        throw new GepitException("Bruv tell me which index to unmark??");
-                    }
+                if (command.equals("unmark")) {
+                    String argument = Parser.getArgument(input);
+                    int taskNumber = Parser.parseTaskNumber(argument);
+                    int index = getTaskIndex(taskNumber);
 
-                    int index = getTaskIndex(parts[1]);
                     ui.showMessage(unmarkTask(tasks.get(index)));
                     continue;
                 }
 
-                if (cmd.equals("todo")) {
-                    if (parts.length < 2 || parts[1].isBlank()) {
-                        throw new GepitException("todo needs a description mate");
-                    }
+                if (command.equals("todo")) {
+                    String argument = Parser.getArgument(input);
+                    Task task = Parser.parseTodo(argument);
 
-                    addTodo(parts[1]);
+                    addTask(task);
                     continue;
                 }
 
-                if (cmd.equals("deadline")) {
-                    if (parts.length < 2 || parts[1].isBlank()) {
-                        throw new GepitException("a deadline needs a description and /by date and(or) time");
-                    }
+                if (command.equals("deadline")) {
+                    String argument = Parser.getArgument(input);
+                    Task task = Parser.parseDeadline(argument);
 
-                    addDeadline(parts[1]);
+                    addTask(task);
                     continue;
                 }
 
-                if (cmd.equals("event")) {
-                    if (parts.length < 2 || parts[1].isBlank()) {
-                        throw new GepitException("an event needs a description, /from and /to date and(or) time");
-                    }
+                if (command.equals("event")) {
+                    String argument = Parser.getArgument(input);
+                    Task task = Parser.parseEvent(argument);
 
-                    addEvent(parts[1]);
+                    addTask(task);
                     continue;
                 }
 
                 throw new GepitException(
-                        "Sorry m8, IDK what " + cmd + " is supposed to mean"
+                        "Sorry m8, IDK what " + command + " is supposed to mean"
                 );
 
             } catch (GepitException e) {
@@ -167,102 +152,22 @@ public class Gepit {
         return "\n " + "Now you have " + tasks.size() + " tasks in the list\n" + BAR;
     }
 
-    private static void addTodo(String description) throws GepitException {
-        Task task = new Todo(description);
+    private static void addTask(Task task) throws GepitException {
         tasks.add(task);
         storage.save(tasks);
 
-        ui.showMessage(GOT_IT_MESSAGE + task + getTaskCountMessage());
+        ui.showMessage(
+                GOT_IT_MESSAGE
+                        + task
+                        + getTaskCountMessage());
     }
 
-    private static void addDeadline(String input) throws GepitException {
-        String[] parts = input.split(" /by ", 2);
+    private static int getTaskIndex(int taskNumber) throws GepitException {
+        int index = taskNumber - 1;
 
-        if (parts.length < 2
-                || parts[0].isBlank()
-                || parts[1].isBlank()) {
-            throw new GepitException(
-                    "A deadline should look like:"
-                            + "\ndeadline return book /by Sunday");
-        }
-
-        String description = parts[0];
-        LocalDate by;
-
-        try {
-            by = LocalDate.parse(parts[1]);
-        } catch (DateTimeParseException e) {
-            throw new GepitException(
-                    "Deadline date should use YYYY-MM-DD, e.g. 2026-09-10");
-        }
-
-        Task task = new Deadline(description, by);
-        tasks.add(task);
-        storage.save(tasks);
-
-        ui.showMessage(GOT_IT_MESSAGE + task + getTaskCountMessage());
-    }
-
-    private static void addEvent(String input) throws GepitException {
-        String[] parts = input.split(" /from ", 2);
-
-        if (parts.length < 2 || parts[0].isBlank()) {
-            throw new GepitException(
-                    "An event should look like:"
-                            + "\nevent meeting /from 2026-09-10 /to 2026-09-11");
-        }
-
-        String[] eventDuration = parts[1].split(" /to ", 2);
-
-        if (eventDuration.length < 2
-                || eventDuration[0].isBlank()
-                || eventDuration[1].isBlank()) {
-            throw new GepitException(
-                    "An event should look like:"
-                            + "\nevent meeting /from 2026-09-10 /to 2026-09-11");
-        }
-
-        String description = parts[0];
-        LocalDate start;
-        LocalDate end;
-
-        try {
-            start = LocalDate.parse(eventDuration[0]);
-            end = LocalDate.parse(eventDuration[1]);
-        } catch (DateTimeParseException e) {
-            throw new GepitException(
-                    "Event dates should use yyyy-MM-dd, "
-                            + "e.g. event meeting /from 2026-09-10 /to 2026-09-11");
-        }
-
-        if (end.isBefore(start)) {
-            throw new GepitException(
-                    "An event cannot end before it starts.");
-        }
-
-        Task task = new Event(description, start, end);
-        tasks.add(task);
-        storage.save(tasks);
-
-        ui.showMessage(GOT_IT_MESSAGE + task + getTaskCountMessage());
-    }
-
-    private static int getTaskIndex(String input) throws GepitException {
-        int taskNum;
-
-        try {
-            taskNum = Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            throw new GepitException(
-                    input + " isn't a valid task number"
-            );
-        }
-
-        int index = taskNum - 1;
         if (index < 0 || index >= tasks.size()) {
             throw new GepitException(
-                    "Task " + taskNum + " doesn't exist"
-            );
+                    "Task " + taskNumber + " doesn't exist");
         }
 
         return index;
