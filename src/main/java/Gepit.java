@@ -211,7 +211,7 @@ public class Gepit {
         if (parts.length < 2 || parts[0].isBlank()) {
             throw new GepitException(
                     "An event should look like:"
-                            + "\nevent meeting /from Mon 2pm /to 4pm");
+                            + "\nevent meeting /from 2026-09-10 /to 2026-09-11");
         }
 
         String[] eventDuration = parts[1].split(" /to ", 2);
@@ -221,7 +221,7 @@ public class Gepit {
                 || eventDuration[1].isBlank()) {
             throw new GepitException(
                     "An event should look like:"
-                            + "\nevent meeting /from Mon 2pm /to 4pm");
+                            + "\nevent meeting /from 2026-09-10 /to 2026-09-11");
         }
 
         String description = parts[0];
@@ -294,14 +294,17 @@ public class Gepit {
 
         try {
             List<String> lines = Files.readAllLines(DATA_FILE);
+            ArrayList<Task> loadedTasks = new ArrayList<>();
 
             for (String line : lines) {
                 if (line.isBlank()) {
                     continue;
                 }
 
-                tasks.add(parseSavedTask(line));
+                loadedTasks.add(parseSavedTask(line));
             }
+
+            tasks.addAll(loadedTasks);
         } catch (IOException e) {
             throw new GepitException("I couldn't load your saved tasks.");
         }
