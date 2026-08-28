@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 public class Gepit {
+    private static final Ui ui = new Ui();
     private static final String BAR = "____________________________________________________________";
     private static final String INTRO_MESSAGE = """
             ____________________________________________________________
@@ -28,25 +29,22 @@ public class Gepit {
             new Storage("data/gepit.txt");
 
     public static void main(String[] args) {
-        System.out.println(INTRO_MESSAGE);
+        ui.showWelcome();
 
         try {
             tasks = new TaskList(storage.load());
         } catch (GepitException e) {
-            System.out.println(BAR);
-            System.out.println(e.getMessage());
-            System.out.println(BAR);
+            ui.showError(e.getMessage());
             tasks = new TaskList();
         }
 
         runChatBot();
-        System.out.println(GOODBYE_MESSAGE);
+        ui.showGoodbye();
     }
 
     private static void runChatBot() {
-        Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNextLine()) {
-            String input = scanner.nextLine();
+        while (ui.hasNextCommand()) {
+            String input = ui.readCommand();
 
             try {
                 // exit
@@ -61,7 +59,7 @@ public class Gepit {
                         Task task = tasks.get(i);
                         taskOutput = taskOutput + "\n" + (i + 1) + ". " + task;
                     }
-                    System.out.println(BAR + taskOutput + "\n" + BAR);
+                    ui.showMessage(BAR + taskOutput + "\n" + BAR);
                     continue;
                 }
 
@@ -75,7 +73,7 @@ public class Gepit {
                     }
 
                     int index = getTaskIndex(parts[1]);
-                    System.out.println(deleteTask(index));
+                    ui.showMessage(deleteTask(index));
                     continue;
                 }
 
@@ -85,7 +83,7 @@ public class Gepit {
                     }
 
                     int index = getTaskIndex(parts[1]);
-                    System.out.println(markTask(tasks.get(index)));
+                    ui.showMessage(markTask(tasks.get(index)));
                     continue;
                 }
 
@@ -95,7 +93,7 @@ public class Gepit {
                     }
 
                     int index = getTaskIndex(parts[1]);
-                    System.out.println(unmarkTask(tasks.get(index)));
+                    ui.showMessage(unmarkTask(tasks.get(index)));
                     continue;
                 }
 
@@ -131,9 +129,7 @@ public class Gepit {
                 );
 
             } catch (GepitException e) {
-                System.out.println(BAR);
-                System.out.println(e.getMessage());
-                System.out.println(BAR);
+                ui.showError(e.getMessage());
             }
         }
     }
@@ -176,7 +172,7 @@ public class Gepit {
         tasks.add(task);
         storage.save(tasks);
 
-        System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
+        ui.showMessage(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
 
     private static void addDeadline(String input) throws GepitException {
@@ -204,7 +200,7 @@ public class Gepit {
         tasks.add(task);
         storage.save(tasks);
 
-        System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
+        ui.showMessage(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
 
     private static void addEvent(String input) throws GepitException {
@@ -248,7 +244,7 @@ public class Gepit {
         tasks.add(task);
         storage.save(tasks);
 
-        System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
+        ui.showMessage(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
 
     private static int getTaskIndex(String input) throws GepitException {
