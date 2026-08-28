@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class Gepit {
     private static final String BAR = "____________________________________________________________";
@@ -187,7 +189,14 @@ public class Gepit {
         }
 
         String description = parts[0];
-        String by = parts[1];
+        LocalDate by;
+
+        try {
+            by = LocalDate.parse(parts[1]);
+        } catch (DateTimeParseException e) {
+            throw new GepitException(
+                    "Deadline date should use YYYY-MM-DD, e.g. 2026-09-10");
+        }
 
         Task task = new Deadline(description, by);
         tasks.add(task);
@@ -202,7 +211,7 @@ public class Gepit {
         if (parts.length < 2 || parts[0].isBlank()) {
             throw new GepitException(
                     "An event should look like:"
-                            + "\nevent meeting /from Mon 2pm /to 4pm");
+                            + "\nevent meeting /from 2026-09-10 /to 2026-09-11");
         }
 
         String[] eventDuration = parts[1].split(" /to ", 2);
@@ -212,12 +221,26 @@ public class Gepit {
                 || eventDuration[1].isBlank()) {
             throw new GepitException(
                     "An event should look like:"
-                            + "\nevent meeting /from Mon 2pm /to 4pm");
+                            + "\nevent meeting /from 2026-09-10 /to 2026-09-11");
         }
 
         String description = parts[0];
-        String start = eventDuration[0];
-        String end = eventDuration[1];
+        LocalDate start;
+        LocalDate end;
+
+        try {
+            start = LocalDate.parse(eventDuration[0]);
+            end = LocalDate.parse(eventDuration[1]);
+        } catch (DateTimeParseException e) {
+            throw new GepitException(
+                    "Event dates should use yyyy-MM-dd, "
+                            + "e.g. event meeting /from 2026-09-10 /to 2026-09-11");
+        }
+
+        if (end.isBefore(start)) {
+            throw new GepitException(
+                    "An event cannot end before it starts.");
+        }
 
         Task task = new Event(description, start, end);
         tasks.add(task);
@@ -271,34 +294,75 @@ public class Gepit {
 
         try {
             List<String> lines = Files.readAllLines(DATA_FILE);
+            ArrayList<Task> loadedTasks = new ArrayList<>();
 
             for (String line : lines) {
-                String[] lineSplit = line.split(" \\| ");
-
-                String type = lineSplit[0];
-                boolean isDone = lineSplit[1].equals("1");
-                String description = lineSplit[2];
-
-                Task task;
-
-                if (type.equals("T")) {
-                    task = new Todo(description);
-                } else if (type.equals("D")) {
-                    task = new Deadline(description, lineSplit[3]);
-                } else if (type.equals("E")) {
-                    task = new Event(description, lineSplit[3], lineSplit[4]);
-                } else {
-                    throw new GepitException("The task file contains an unknown task type");
+                if (line.isBlank()) {
+                    continue;
                 }
 
-                if (isDone) {
-                    task.markDone();
-                }
-                tasks.add(task);
+                loadedTasks.add(parseSavedTask(line));
             }
 
+            tasks.addAll(loadedTasks);
         } catch (IOException e) {
-            throw new GepitException("Yo! I couldn't load your tasks, check the task file?");
+            throw new GepitException("I couldn't load your saved tasks.");
         }
+    }
+
+    private static Task parseSavedTask(String line) throws GepitException {
+        String[] parts = line.split(" \\| ");
+
+        if (parts.length < 3) {
+            throw new GepitException("Invalid task data: " + line);
+        }
+
+        String type = parts[0];
+        String doneValue = parts[1];
+        String description = parts[2];
+
+        if (!doneValue.equals("0") && !doneValue.equals("1")) {
+            throw new GepitException("Invalid task status in saved data: " + line);
+        }
+
+        Task task;
+
+        try {
+            switch (type) {
+                case "T":
+                    if (parts.length != 3) {
+                        throw new GepitException("Invalid todo data: " + line);
+                    }
+                    task = new Todo(description);
+                    break;
+
+                case "D":
+                    if (parts.length != 4) {
+                        throw new GepitException("Invalid deadline data: " + line);
+                    }
+                    task = new Deadline(description, LocalDate.parse(parts[3]));
+                    break;
+
+                case "E":
+                    if (parts.length != 5) {
+                        throw new GepitException("Invalid event data: " + line);
+                    }
+                    task = new Event(description,
+                            LocalDate.parse(parts[3]),
+                            LocalDate.parse(parts[4]));
+                    break;
+
+                default:
+                    throw new GepitException("Unknown task type in saved data: " + type);
+            }
+        } catch (DateTimeParseException e) {
+            throw new GepitException("Invalid date in saved task: " + line);
+        }
+
+        if (doneValue.equals("1")) {
+            task.markDone();
+        }
+
+        return task;
     }
 }
