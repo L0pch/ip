@@ -39,7 +39,6 @@ public class Gepit {
         System.out.println(GOODBYE_MESSAGE);
     }
 
-    //handles where the input gets sent to for further handling
     private static void runChatBot() {
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
@@ -83,7 +82,6 @@ public class Gepit {
 
                     int index = getTaskIndex(parts[1]);
                     System.out.println(markTask(tasks.get(index)));
-                    saveTasks();
                     continue;
                 }
 
@@ -94,7 +92,6 @@ public class Gepit {
 
                     int index = getTaskIndex(parts[1]);
                     System.out.println(unmarkTask(tasks.get(index)));
-                    saveTasks();
                     continue;
                 }
 
@@ -104,7 +101,6 @@ public class Gepit {
                     }
 
                     addTodo(parts[1]);
-                    saveTasks();
                     continue;
                 }
 
@@ -114,7 +110,6 @@ public class Gepit {
                     }
 
                     addDeadline(parts[1]);
-                    saveTasks();
                     continue;
                 }
 
@@ -124,7 +119,6 @@ public class Gepit {
                     }
 
                     addEvent(parts[1]);
-                    saveTasks();
                     continue;
                 }
 
@@ -232,7 +226,6 @@ public class Gepit {
         System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
 
-    //to validate index Strings and return correct task array index
     private static int getTaskIndex(String input) throws GepitException {
         int taskNum;
 
@@ -284,16 +277,16 @@ public class Gepit {
 
                 String type = lineSplit[0];
                 boolean isDone = lineSplit[1].equals("1");
-                String desc = lineSplit[2];
+                String description = lineSplit[2];
 
                 Task task;
 
                 if (type.equals("T")) {
-                    task = new Todo(desc);
+                    task = new Todo(description);
                 } else if (type.equals("D")) {
-                    task = new Deadline(desc, lineSplit[3]);
+                    task = new Deadline(description, lineSplit[3]);
                 } else if (type.equals("E")) {
-                    task = new Event(desc, lineSplit[3], lineSplit[4]);
+                    task = new Event(description, lineSplit[3], lineSplit[4]);
                 } else {
                     throw new GepitException("The task file contains an unknown task type");
                 }
