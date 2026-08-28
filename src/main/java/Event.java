@@ -1,21 +1,36 @@
-public class Event extends Task{
-    private String start;
-    private String end;
-    public Event(String text, String start, String end) {
-        super(text);
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Represents a task occurring between two specific dates.
+ */
+public class Event extends Task {
+    private static final DateTimeFormatter DISPLAY_FORMAT =
+            DateTimeFormatter.ofPattern("MMM d yyyy");
+
+    private final LocalDate start;
+    private final LocalDate end;
+
+    /**
+     * Creates an event with the specified description, start date, and end date.
+     */
+    public Event(String description, LocalDate start, LocalDate end) {
+        super(description);
         this.start = start;
         this.end = end;
     }
 
     @Override
-    public String toDataString() {
-        return "E | " + super.toDataString() +
-                " | " + this.start + " | " + this.end;
+    public String toString() {
+        return "[E]" + super.toString()
+                + " (from: " + start.format(DISPLAY_FORMAT)
+                + " to: " + end.format(DISPLAY_FORMAT) + ")";
     }
 
     @Override
-    public String toString() {
-        return "[E]" + super.toString() +
-                " (from: " + this.start + " to: " + this.end + ")";
+    public String toDataString() {
+        return "E | " + super.toDataString()
+                + " | " + start
+                + " | " + end;
     }
 }
