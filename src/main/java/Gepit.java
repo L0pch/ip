@@ -1,4 +1,8 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Gepit {
@@ -18,9 +22,19 @@ public class Gepit {
             """;
 
     private static final ArrayList<Task> tasks = new ArrayList<>();
+    private static final Path DATA_FILE = Path.of("data", "gepit.txt");
 
     public static void main(String[] args) {
         System.out.println(INTRO_MESSAGE);
+
+        try {
+            loadTasks();
+        } catch (GepitException e) {
+            System.out.println(BAR);
+            System.out.println(e.getMessage());
+            System.out.println(BAR);
+        }
+
         runChatBot();
         System.out.println(GOODBYE_MESSAGE);
     }
@@ -58,11 +72,7 @@ public class Gepit {
                     }
 
                     int index = getTaskIndex(parts[1]);
-                    Task task = tasks.remove(index);
-                    String output = BAR + "\n I've done it boss. Deleted this guy:" +
-                            "\n     " + task.toString() + getTaskCountMessage();
-                    System.out.println(output);
-
+                    System.out.println(deleteTask(index));
                     continue;
                 }
 
@@ -73,6 +83,7 @@ public class Gepit {
 
                     int index = getTaskIndex(parts[1]);
                     System.out.println(markTask(tasks.get(index)));
+                    saveTasks();
                     continue;
                 }
 
@@ -83,6 +94,7 @@ public class Gepit {
 
                     int index = getTaskIndex(parts[1]);
                     System.out.println(unmarkTask(tasks.get(index)));
+                    saveTasks();
                     continue;
                 }
 
@@ -92,6 +104,7 @@ public class Gepit {
                     }
 
                     addTodo(parts[1]);
+                    saveTasks();
                     continue;
                 }
 
@@ -101,6 +114,7 @@ public class Gepit {
                     }
 
                     addDeadline(parts[1]);
+                    saveTasks();
                     continue;
                 }
 
@@ -110,6 +124,7 @@ public class Gepit {
                     }
 
                     addEvent(parts[1]);
+                    saveTasks();
                     continue;
                 }
 
@@ -125,29 +140,45 @@ public class Gepit {
         }
     }
 
-    private static String markTask(Task task) {
+    private static String deleteTask(int index) throws GepitException {
+        Task task = tasks.remove(index);
+        saveTasks();
+
+        return BAR + "\n I've done it boss. Deleted this guy:"
+                + "\n     " + task
+                + getTaskCountMessage();
+    }
+
+    private static String markTask(Task task) throws GepitException {
         task.markDone();
-        return BAR + "\n Gr8 job it's done mate" +
-                "\n     " + task.toString() +
-                "\n" + BAR;
+        saveTasks();
+
+        return BAR + "\n Gr8 job it's done mate"
+                + "\n     " + task
+                + "\n" + BAR;
     }
 
-    private static String unmarkTask(Task task) {
+    private static String unmarkTask(Task task) throws GepitException {
         task.markNotDone();
-        return BAR + "\n Get to it soon bruv" +
-                "\n     " + task.toString() +
-                "\n" + BAR;
+        saveTasks();
+
+        return BAR + "\n Get to it soon bruv"
+                + "\n     " + task
+                + "\n" + BAR;
     }
 
 
-    private static final String GOTIT = BAR + "\n Got it. task added" + "\n     ";
+    private static final String GOT_IT_MESSAGE = BAR + "\n Got it. task added" + "\n     ";
     private static String getTaskCountMessage() {
         return "\n " + "Now you have " + tasks.size() + " tasks in the list\n" + BAR;
     }
 
-    private static void addTodo(String input) {
-        tasks.add(new Todo(input));
-        System.out.println(GOTIT + tasks.get(tasks.size() - 1).toString() + getTaskCountMessage());
+    private static void addTodo(String description) throws GepitException {
+        Task task = new Todo(description);
+        tasks.add(task);
+        saveTasks();
+
+        System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
 
     private static void addDeadline(String input) throws GepitException {
@@ -158,27 +189,28 @@ public class Gepit {
                 || parts[1].isBlank()) {
             throw new GepitException(
                     "A deadline should look like:"
-                    + "\ndeadline return book /by Sunday"
-            );
+                            + "\ndeadline return book /by Sunday");
         }
 
-        String descr = parts[0];
+        String description = parts[0];
         String by = parts[1];
-        tasks.add(new Deadline(descr, by));
-        System.out.println(GOTIT + tasks.get(tasks.size() - 1).toString() + getTaskCountMessage());
+
+        Task task = new Deadline(description, by);
+        tasks.add(task);
+        saveTasks();
+
+        System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
 
     private static void addEvent(String input) throws GepitException {
         String[] parts = input.split(" /from ", 2);
 
-        if (parts.length < 2
-                || parts[0].isBlank()) {
+        if (parts.length < 2 || parts[0].isBlank()) {
             throw new GepitException(
-                    "An event must have descr and /from"
-            );
+                    "An event should look like:"
+                            + "\nevent meeting /from Mon 2pm /to 4pm");
         }
 
-        String descr = parts[0];
         String[] eventDuration = parts[1].split(" /to ", 2);
 
         if (eventDuration.length < 2
@@ -186,14 +218,18 @@ public class Gepit {
                 || eventDuration[1].isBlank()) {
             throw new GepitException(
                     "An event should look like:"
-                            + "\nevent meeting /from Mon 2pm /to 4pm"
-            );
+                            + "\nevent meeting /from Mon 2pm /to 4pm");
         }
 
+        String description = parts[0];
         String start = eventDuration[0];
         String end = eventDuration[1];
-        tasks.add(new Event(descr, start, end));
-        System.out.println(GOTIT + tasks.get(tasks.size() - 1).toString() + getTaskCountMessage());
+
+        Task task = new Event(description, start, end);
+        tasks.add(task);
+        saveTasks();
+
+        System.out.println(GOT_IT_MESSAGE + task + getTaskCountMessage());
     }
 
     //to validate index Strings and return correct task array index
@@ -204,7 +240,7 @@ public class Gepit {
             taskNum = Integer.parseInt(input);
         } catch (NumberFormatException e) {
             throw new GepitException(
-                    "" + input + " isn't a valid task number"
+                    input + " isn't a valid task number"
             );
         }
 
@@ -216,5 +252,60 @@ public class Gepit {
         }
 
         return index;
+    }
+
+    private static void saveTasks() throws GepitException {
+        try {
+            Files.createDirectories(DATA_FILE.getParent());
+
+            List<String> lines = new ArrayList<>();
+
+            for (Task task : tasks) {
+                lines.add(task.toDataString());
+            }
+
+            Files.write(DATA_FILE, lines);
+
+        } catch (IOException e) {
+            throw new GepitException("I couldn't save your tasks, only God is able to");
+        }
+    }
+
+    private static void loadTasks() throws GepitException {
+        if (!Files.exists(DATA_FILE)) {
+            return;
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(DATA_FILE);
+
+            for (String line : lines) {
+                String[] lineSplit = line.split(" \\| ");
+
+                String type = lineSplit[0];
+                boolean isDone = lineSplit[1].equals("1");
+                String desc = lineSplit[2];
+
+                Task task;
+
+                if (type.equals("T")) {
+                    task = new Todo(desc);
+                } else if (type.equals("D")) {
+                    task = new Deadline(desc, lineSplit[3]);
+                } else if (type.equals("E")) {
+                    task = new Event(desc, lineSplit[3], lineSplit[4]);
+                } else {
+                    throw new GepitException("The task file contains an unknown task type");
+                }
+
+                if (isDone) {
+                    task.markDone();
+                }
+                tasks.add(task);
+            }
+
+        } catch (IOException e) {
+            throw new GepitException("Yo! I couldn't load your tasks, check the task file?");
+        }
     }
 }

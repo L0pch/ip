@@ -21,6 +21,21 @@ public class Task {
         return "[ ]";
     }
 
+    private String getDescription() {
+        return this.descr;
+    }
+
+    /**
+     * Returns the String form of the Task for local storage.
+     * Can get the necessary components of the task
+     * @return description
+     * @return isDone boolean as a String numeral
+     */
+    public String toDataString() {
+        return (isDone ? "1" : "0") +
+                " | " + this.descr;
+    }
+
     @Override
     public String toString() {
         return getStatusIcon() + " " + this.descr;
