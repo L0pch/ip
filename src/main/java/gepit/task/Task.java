@@ -1,5 +1,8 @@
 package gepit.task;
 
+/**
+ * Represents a task that can be marked as done or not done.
+ */
 public class Task {
     private final String description;
     private boolean isDone;
@@ -28,9 +31,9 @@ public class Task {
     }
 
     /**
-     * Returns the representation of this task used for data storage.
+     * Returns the persistent representation of this task.
      *
-     * @return Storage representation of this task.
+     * @return Task representation used for data storage.
      */
     public String toDataString() {
         return (isDone ? "1" : "0") +

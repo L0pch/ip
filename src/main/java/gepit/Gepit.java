@@ -5,6 +5,9 @@ import gepit.storage.Storage;
 import gepit.task.Task;
 import gepit.ui.Ui;
 
+/**
+ * Runs the Gepit chatbot and coordinates command processing.
+ */
 public class Gepit {
     private static final Ui ui = new Ui();
     private static final String BAR =
