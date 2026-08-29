@@ -28,10 +28,9 @@ public class Task {
     }
 
     /**
-     * Returns the String form of the gepit.task.Task for local storage.
-     * Can get the necessary components of the task
-     * @return description
-     * @return isDone boolean as a String numeral
+     * Returns the representation of this task used for data storage.
+     *
+     * @return Storage representation of this task.
      */
     public String toDataString() {
         return (isDone ? "1" : "0") +
