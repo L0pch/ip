@@ -1,5 +1,8 @@
 package gepit.task;
 
+/**
+ * Represents a task without an associated date.
+ */
 public class Todo extends Task {
 
     public Todo(String text) {

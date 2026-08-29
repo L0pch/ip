@@ -20,21 +20,36 @@ public class TaskList {
 
     /**
      * Creates a task list containing the specified tasks.
+     *
+     * @param tasks Tasks to add to the new task list.
      */
     public TaskList(List<Task> tasks) {
         this.tasks = new ArrayList<>(tasks);
     }
 
+    /**
+     * Adds a task to the list.
+     *
+     * @param task Task to add.
+     */
     public void add(Task task) {
         tasks.add(task);
     }
 
+    /**
+     * Returns the task at the specified zero-based index.
+     *
+     * @param index Index of the task.
+     * @return Task at the specified index.
+     */
     public Task get(int index) {
         return tasks.get(index);
     }
 
     /**
      * Removes and returns the task at the specified index.
+     * @param index Index of the task to remove.
+     * @return Removed task.
      */
     public Task remove(int index) {
         return tasks.remove(index);
@@ -42,6 +57,8 @@ public class TaskList {
 
     /**
      * Returns the number of tasks.
+     *
+     * @return Number of tasks.
      */
     public int size() {
         return tasks.size();
@@ -49,6 +66,8 @@ public class TaskList {
 
     /**
      * Returns all tasks in this list.
+     *
+     * @return Copy of the task collection.
      */
     public List<Task> getTasks() {
         return new ArrayList<>(tasks);

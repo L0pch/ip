@@ -27,6 +27,8 @@ public class Ui {
 
     /**
      * Reads and returns the next user command.
+     *
+     * @return Next command entered by the user.
      */
     public String readCommand() {
         return scanner.nextLine();
@@ -58,6 +60,8 @@ public class Ui {
 
     /**
      * Shows an error to the user.
+     *
+     *  @param message Error message to display.
      */
     public void showError(String message) {
         System.out.println(BAR);
