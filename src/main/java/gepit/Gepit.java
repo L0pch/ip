@@ -7,7 +7,8 @@ import gepit.ui.Ui;
 
 public class Gepit {
     private static final Ui ui = new Ui();
-    private static final String BAR = "____________________________________________________________";
+    private static final String BAR =
+            "____________________________________________________________";
 
     private static TaskList tasks = new TaskList();
     private static final Storage storage =
@@ -39,10 +40,13 @@ public class Gepit {
 
                 //print list
                 if (input.equals("list")) {
-                    String taskOutput = "";
+                    StringBuilder taskOutput = new StringBuilder();
                     for (int i = 0; i < tasks.size(); i++) {
                         Task task = tasks.get(i);
-                        taskOutput = taskOutput + "\n" + (i + 1) + ". " + task;
+                        taskOutput.append("\n")
+                                .append(i + 1)
+                                .append(". ")
+                                .append(task);
                     }
                     ui.showMessage(BAR + taskOutput + "\n" + BAR);
                     continue;
@@ -139,8 +143,9 @@ public class Gepit {
                 + "\n" + BAR;
     }
 
+    private static final String GOT_IT_MESSAGE =
+            BAR + "\n Got it. task added" + "\n     ";
 
-    private static final String GOT_IT_MESSAGE = BAR + "\n Got it. task added" + "\n     ";
     private static String getTaskCountMessage() {
         return "\n " + "Now you have " + tasks.size() + " tasks in the list\n" + BAR;
     }

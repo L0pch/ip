@@ -71,11 +71,4 @@ public class Ui {
     public void showMessage(String message) {
         System.out.println(message);
     }
-
-    /**
-     * Returns the separator used by chatbot messages.
-     */
-    public String getBar() {
-        return BAR;
-    }
 }
