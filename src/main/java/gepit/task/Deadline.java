@@ -20,6 +20,10 @@ public class Deadline extends Task {
         this.due = due;
     }
 
+    public LocalDate getDue() {
+        return due;
+    }
+
     @Override
     public String toString() {
         return "[D]" + super.toString()
