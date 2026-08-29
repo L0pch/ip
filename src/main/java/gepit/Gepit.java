@@ -4,10 +4,12 @@ import gepit.parser.Parser;
 import gepit.storage.Storage;
 import gepit.task.Task;
 import gepit.ui.Ui;
+import java.util.List;
 
 /**
  * Runs the Gepit chatbot and coordinates command processing.
  */
+
 public class Gepit {
     private static final Ui ui = new Ui();
     private static final String BAR =
@@ -55,8 +57,14 @@ public class Gepit {
                     continue;
                 }
 
-                //split input
                 String command = Parser.getCommand(input);
+
+                if (command.equals("find")) {
+                    String keyword = Parser.getArgument(input);
+                    List<Task> matchingTasks = tasks.find(keyword);
+                    ui.showTaskMatches(matchingTasks);
+                    continue;
+                }
 
                 if (command.equals("delete")) {
                     String argument = Parser.getArgument(input);
