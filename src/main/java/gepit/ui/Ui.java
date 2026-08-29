@@ -1,5 +1,8 @@
 package gepit.ui;
 
+import gepit.task.Task;
+
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -70,6 +73,23 @@ public class Ui {
      */
     public void showMessage(String message) {
         System.out.println(message);
+    }
+
+    public void showTaskMatches(List<Task> tasks) {
+        StringBuilder output = new StringBuilder();
+        output.append(BAR)
+                .append("\nHere are the matching tasks in your list:");
+
+        for (int i = 0; i < tasks.size(); i++) {
+            output.append("\n")
+                    .append(i + 1)
+                    .append(".")
+                    .append(tasks.get(i));
+        }
+
+        output.append("\n").append(BAR);
+
+        System.out.println(output);
     }
 
     /**

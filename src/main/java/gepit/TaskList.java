@@ -53,4 +53,22 @@ public class TaskList {
     public List<Task> getTasks() {
         return new ArrayList<>(tasks);
     }
+
+    /**
+     * Returns all tasks that contain the keyword
+     * @param keyword
+     * @return
+     */
+
+    public List<Task> find(String keyword) {
+        List<Task> matchingTasks = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.getDescription().contains(keyword)) {
+                matchingTasks.add(task);
+            }
+        }
+
+        return matchingTasks;
+    }
 }
