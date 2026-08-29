@@ -1,11 +1,11 @@
 package gepit.task;
 
 public class Task {
-    private final String descr;
+    private final String description;
     private boolean isDone;
 
     public Task(String text) {
-        this.descr = text;
+        this.description = text;
     }
 
     public void markDone() {
@@ -23,8 +23,8 @@ public class Task {
         return "[ ]";
     }
 
-    private String getDescription() {
-        return this.descr;
+    public String getDescription() {
+        return this.description;
     }
 
     /**
@@ -35,11 +35,11 @@ public class Task {
      */
     public String toDataString() {
         return (isDone ? "1" : "0") +
-                " | " + this.descr;
+                " | " + this.description;
     }
 
     @Override
     public String toString() {
-        return getStatusIcon() + " " + this.descr;
+        return getStatusIcon() + " " + this.description;
     }
 }
