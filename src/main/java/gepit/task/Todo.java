@@ -1,4 +1,6 @@
-public class Todo extends Task{
+package gepit.task;
+
+public class Todo extends Task {
 
     public Todo(String text) {
         super(text);

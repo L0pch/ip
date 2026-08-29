@@ -1,3 +1,5 @@
+package gepit.ui;
+
 import java.util.Scanner;
 
 /**

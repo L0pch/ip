@@ -1,3 +1,5 @@
+package gepit.task;
+
 public class Task {
     private final String descr;
     private boolean isDone;
@@ -26,7 +28,7 @@ public class Task {
     }
 
     /**
-     * Returns the String form of the Task for local storage.
+     * Returns the String form of the gepit.task.Task for local storage.
      * Can get the necessary components of the task
      * @return description
      * @return isDone boolean as a String numeral

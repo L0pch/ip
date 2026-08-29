@@ -1,20 +1,13 @@
+package gepit;
+
+import gepit.parser.Parser;
+import gepit.storage.Storage;
+import gepit.task.Task;
+import gepit.ui.Ui;
 
 public class Gepit {
     private static final Ui ui = new Ui();
     private static final String BAR = "____________________________________________________________";
-    private static final String INTRO_MESSAGE = """
-            ____________________________________________________________
-            Hey man I'm Gepit
-            What can I do for you?
-            ____________________________________________________________
-            """;
-
-    private static final String GOODBYE_MESSAGE = """
-            ____________________________________________________________
-            Bye Friendo
-            See you again next time :)
-            ____________________________________________________________
-            """;
 
     private static TaskList tasks = new TaskList();
     private static final Storage storage =
