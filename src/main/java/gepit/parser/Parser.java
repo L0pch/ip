@@ -1,3 +1,10 @@
+package gepit.parser;
+
+import gepit.GepitException;
+import gepit.task.Deadline;
+import gepit.task.Event;
+import gepit.task.Todo;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
@@ -37,7 +44,7 @@ public class Parser {
     /**
      * Parses a user-facing task number.
      *
-     * @param input Task number to parse.
+     * @param input gepit.task.Task number to parse.
      * @return Parsed task number.
      * @throws GepitException If the input is not a valid integer.
      */
@@ -54,7 +61,7 @@ public class Parser {
     /**
      * Creates a todo from its description.
      *
-     * @param input Todo description.
+     * @param input gepit.task.Todo description.
      * @return Parsed todo.
      */
     public static Todo parseTodo(String input) {
@@ -64,7 +71,7 @@ public class Parser {
     /**
      * Parses a deadline command argument.
      *
-     * @param input Deadline description and date.
+     * @param input gepit.task.Deadline description and date.
      * @return Parsed deadline.
      * @throws GepitException If the deadline format is invalid.
      */
@@ -87,7 +94,7 @@ public class Parser {
             return new Deadline(description, due);
         } catch (DateTimeParseException e) {
             throw new GepitException(
-                    "Deadline date should use yyyy-MM-dd, "
+                    "gepit.task.Deadline date should use yyyy-MM-dd, "
                             + "e.g. 2026-09-10");
         }
     }
@@ -95,7 +102,7 @@ public class Parser {
     /**
      * Parses an event command argument.
      *
-     * @param input Event description, start date, and end date.
+     * @param input gepit.task.Event description, start date, and end date.
      * @return Parsed event.
      * @throws GepitException If the event format is invalid.
      */
@@ -134,7 +141,7 @@ public class Parser {
             return new Event(description, start, end);
         } catch (DateTimeParseException e) {
             throw new GepitException(
-                    "Event dates should use yyyy-MM-dd, "
+                    "gepit.task.Event dates should use yyyy-MM-dd, "
                             + "e.g. event meeting /from 2026-09-10 "
                             + "/to 2026-09-11");
         }
