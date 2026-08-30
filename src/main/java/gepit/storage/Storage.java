@@ -1,12 +1,5 @@
 package gepit.storage;
 
-import gepit.GepitException;
-import gepit.TaskList;
-import gepit.task.Deadline;
-import gepit.task.Event;
-import gepit.task.Task;
-import gepit.task.Todo;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +7,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import gepit.GepitException;
+import gepit.TaskList;
+import gepit.task.Deadline;
+import gepit.task.Event;
+import gepit.task.Task;
+import gepit.task.Todo;
+
 
 /**
  * Handles loading tasks from and saving tasks to disk.

@@ -1,9 +1,9 @@
 package gepit;
 
-import gepit.task.Task;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import gepit.task.Task;
 
 /**
  * Manages the user's collection of tasks.
@@ -75,10 +75,10 @@ public class TaskList {
 
     /**
      * Returns all tasks that contain the keyword
-     * @param keyword
-     * @return
+     *
+     * @param keyword Keyword to search for
+     * @return Tasks containing the keyword
      */
-
     public List<Task> find(String keyword) {
         List<Task> matchingTasks = new ArrayList<>();
 

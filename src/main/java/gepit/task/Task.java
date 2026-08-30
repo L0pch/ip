@@ -7,14 +7,25 @@ public class Task {
     private final String description;
     private boolean isDone;
 
+    /**
+     * Creates a task with the specified description.
+     *
+     * @param text Description of the task.
+     */
     public Task(String text) {
         this.description = text;
     }
 
+    /**
+     * Marks this task as done.
+     */
     public void markDone() {
         this.isDone = true;
     }
 
+    /**
+     * Marks this task as not done.
+     */
     public void markNotDone() {
         this.isDone = false;
     }
@@ -36,8 +47,8 @@ public class Task {
      * @return Task representation used for data storage.
      */
     public String toDataString() {
-        return (isDone ? "1" : "0") +
-                " | " + this.description;
+        return (isDone ? "1" : "0")
+                + " | " + this.description;
     }
 
     @Override
