@@ -1,177 +1,205 @@
 package gepit;
 
+import java.util.List;
+
 import gepit.parser.Parser;
 import gepit.storage.Storage;
 import gepit.task.Task;
 import gepit.ui.Ui;
-import java.util.List;
 
 /**
  * Runs the Gepit chatbot and coordinates command processing.
  */
-
 public class Gepit {
-    private static final Ui ui = new Ui();
     private static final String BAR =
             "____________________________________________________________";
+    private static final String GOT_IT_MESSAGE =
+            BAR + "\n Got it. task added" + "\n     ";
 
-    private static TaskList tasks = new TaskList();
-    private static final Storage storage =
-            new Storage("data/gepit.txt");
+    private final Storage storage;
+    private TaskList tasks;
 
-    public static void main(String[] args) {
-        ui.showWelcome();
+    /**
+     * Creates a Gepit chatbot and loads previously saved tasks.
+     */
+    public Gepit() {
+        storage = new Storage("data/gepit.txt");
 
         try {
             tasks = new TaskList(storage.load());
         } catch (GepitException e) {
-            ui.showError(e.getMessage());
             tasks = new TaskList();
         }
-
-        runChatBot();
-        ui.showGoodbye();
     }
 
-    private static void runChatBot() {
+    /**
+     * Runs Gepit using the text-based user interface.
+     *
+     * @param args Command-line arguments.
+     */
+    public static void main(String[] args) {
+        Gepit gepit = new Gepit();
+        Ui ui = new Ui();
+
+        ui.showWelcome();
+
         while (ui.hasNextCommand()) {
             String input = ui.readCommand();
 
-            try {
-                // exit
-                if (input.equals("bye")) {
-                    return;
-                }
-
-                //print list
-                if (input.equals("list")) {
-                    StringBuilder taskOutput = new StringBuilder();
-                    for (int i = 0; i < tasks.size(); i++) {
-                        Task task = tasks.get(i);
-                        taskOutput.append("\n")
-                                .append(i + 1)
-                                .append(". ")
-                                .append(task);
-                    }
-                    ui.showMessage(BAR + taskOutput + "\n" + BAR);
-                    continue;
-                }
-
-                String command = Parser.getCommand(input);
-
-                if (command.equals("find")) {
-                    String keyword = Parser.getArgument(input);
-                    List<Task> matchingTasks = tasks.find(keyword);
-                    ui.showTaskMatches(matchingTasks);
-                    continue;
-                }
-
-                if (command.equals("delete")) {
-                    String argument = Parser.getArgument(input);
-                    int taskNumber = Parser.parseTaskNumber(argument);
-                    int index = getTaskIndex(taskNumber);
-
-                    ui.showMessage(deleteTask(index));
-                    continue;
-                }
-
-                if (command.equals("mark")) {
-                    String argument = Parser.getArgument(input);
-                    int taskNumber = Parser.parseTaskNumber(argument);
-                    int index = getTaskIndex(taskNumber);
-
-                    ui.showMessage(markTask(tasks.get(index)));
-                    continue;
-                }
-
-                if (command.equals("unmark")) {
-                    String argument = Parser.getArgument(input);
-                    int taskNumber = Parser.parseTaskNumber(argument);
-                    int index = getTaskIndex(taskNumber);
-
-                    ui.showMessage(unmarkTask(tasks.get(index)));
-                    continue;
-                }
-
-                if (command.equals("todo")) {
-                    String argument = Parser.getArgument(input);
-                    Task task = Parser.parseTodo(argument);
-
-                    addTask(task);
-                    continue;
-                }
-
-                if (command.equals("deadline")) {
-                    String argument = Parser.getArgument(input);
-                    Task task = Parser.parseDeadline(argument);
-
-                    addTask(task);
-                    continue;
-                }
-
-                if (command.equals("event")) {
-                    String argument = Parser.getArgument(input);
-                    Task task = Parser.parseEvent(argument);
-
-                    addTask(task);
-                    continue;
-                }
-
-                throw new GepitException(
-                        "Sorry m8, IDK what " + command + " is supposed to mean"
-                );
-
-            } catch (GepitException e) {
-                ui.showError(e.getMessage());
+            if (input.equals("bye")) {
+                break;
             }
+
+            ui.showMessage(gepit.getResponse(input));
+        }
+
+        ui.showGoodbye();
+    }
+
+    /**
+     * Returns Gepit's response to the specified user input.
+     *
+     * @param input User input to process.
+     * @return Response to display to the user.
+     */
+    public String getResponse(String input) {
+        try {
+            if (input.equals("bye")) {
+                return "Bye Friendo\nSee you again next time :)";
+            }
+
+            if (input.equals("list")) {
+                return getTaskListMessage();
+            }
+
+            String command = Parser.getCommand(input);
+
+            if (command.equals("find")) {
+                String keyword = Parser.getArgument(input);
+                return getTaskMatchesMessage(tasks.find(keyword));
+            }
+
+            if (command.equals("delete")) {
+                String argument = Parser.getArgument(input);
+                int taskNumber = Parser.parseTaskNumber(argument);
+                int index = getTaskIndex(taskNumber);
+                return deleteTask(index);
+            }
+
+            if (command.equals("mark")) {
+                String argument = Parser.getArgument(input);
+                int taskNumber = Parser.parseTaskNumber(argument);
+                int index = getTaskIndex(taskNumber);
+                return markTask(tasks.get(index));
+            }
+
+            if (command.equals("unmark")) {
+                String argument = Parser.getArgument(input);
+                int taskNumber = Parser.parseTaskNumber(argument);
+                int index = getTaskIndex(taskNumber);
+                return unmarkTask(tasks.get(index));
+            }
+
+            if (command.equals("todo")) {
+                String argument = Parser.getArgument(input);
+                Task task = Parser.parseTodo(argument);
+                return addTask(task);
+            }
+
+            if (command.equals("deadline")) {
+                String argument = Parser.getArgument(input);
+                Task task = Parser.parseDeadline(argument);
+                return addTask(task);
+            }
+
+            if (command.equals("event")) {
+                String argument = Parser.getArgument(input);
+                Task task = Parser.parseEvent(argument);
+                return addTask(task);
+            }
+
+            throw new GepitException(
+                    "Sorry m8, IDK what " + command + " is supposed to mean");
+
+        } catch (GepitException e) {
+            return e.getMessage();
         }
     }
 
-    private static String deleteTask(int index) throws GepitException {
+    private String getTaskListMessage() {
+        if (tasks.size() == 0) {
+            return "You don't have any tasks yet.";
+        }
+
+        StringBuilder taskOutput = new StringBuilder("Here are your tasks:");
+
+        for (int i = 0; i < tasks.size(); i++) {
+            taskOutput.append("\n")
+                    .append(i + 1)
+                    .append(". ")
+                    .append(tasks.get(i));
+        }
+
+        return taskOutput.toString();
+    }
+
+    private String getTaskMatchesMessage(List<Task> matchingTasks) {
+        if (matchingTasks.isEmpty()) {
+            return "I couldn't find any matching tasks.";
+        }
+
+        StringBuilder output =
+                new StringBuilder("Here are the matching tasks in your list:");
+
+        for (int i = 0; i < matchingTasks.size(); i++) {
+            output.append("\n")
+                    .append(i + 1)
+                    .append(". ")
+                    .append(matchingTasks.get(i));
+        }
+
+        return output.toString();
+    }
+
+    private String deleteTask(int index) throws GepitException {
         Task task = tasks.remove(index);
         storage.save(tasks);
 
-        return BAR + "\n I've done it boss. Deleted this guy:"
-                + "\n     " + task
+        return "I've done it boss. Deleted this guy:"
+                + "\n" + task
                 + getTaskCountMessage();
     }
 
-    private static String markTask(Task task) throws GepitException {
+    private String markTask(Task task) throws GepitException {
         task.markDone();
         storage.save(tasks);
 
-        return BAR + "\n Gr8 job it's done mate"
-                + "\n     " + task
-                + "\n" + BAR;
+        return "Gr8 job it's done mate"
+                + "\n" + task;
     }
 
-    private static String unmarkTask(Task task) throws GepitException {
+    private String unmarkTask(Task task) throws GepitException {
         task.markNotDone();
         storage.save(tasks);
 
-        return BAR + "\n Get to it soon bruv"
-                + "\n     " + task
-                + "\n" + BAR;
+        return "Get to it soon bruv"
+                + "\n" + task;
     }
 
-    private static final String GOT_IT_MESSAGE =
-            BAR + "\n Got it. task added" + "\n     ";
-
-    private static String getTaskCountMessage() {
-        return "\n " + "Now you have " + tasks.size() + " tasks in the list\n" + BAR;
+    private String getTaskCountMessage() {
+        return "\nNow you have " + tasks.size() + " tasks in the list";
     }
 
-    private static void addTask(Task task) throws GepitException {
+    private String addTask(Task task) throws GepitException {
         tasks.add(task);
         storage.save(tasks);
 
-        ui.showMessage(
-                GOT_IT_MESSAGE
-                        + task
-                        + getTaskCountMessage());
+        return "Got it. Task added:"
+                + "\n" + task
+                + getTaskCountMessage();
     }
 
-    private static int getTaskIndex(int taskNumber) throws GepitException {
+    private int getTaskIndex(int taskNumber) throws GepitException {
         int index = taskNumber - 1;
 
         if (index < 0 || index >= tasks.size()) {

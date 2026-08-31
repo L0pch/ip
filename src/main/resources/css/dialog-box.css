@@ -1,0 +1,11 @@
+.label {
+    -fx-background-color: #dcecff;
+    -fx-background-radius: 14px;
+    -fx-padding: 10px 14px 10px 14px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #202020;
+}
+
+.reply-label {
+    -fx-background-color: #eeeeee;
+}
