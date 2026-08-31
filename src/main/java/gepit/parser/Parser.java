@@ -1,12 +1,12 @@
 package gepit.parser;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 import gepit.GepitException;
 import gepit.task.Deadline;
 import gepit.task.Event;
 import gepit.task.Todo;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 /**
  * Parses user input into commands and task information.

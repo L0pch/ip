@@ -1,9 +1,9 @@
 package gepit.ui;
 
-import gepit.task.Task;
-
 import java.util.List;
 import java.util.Scanner;
+
+import gepit.task.Task;
 
 /**
  * Handles interactions with the user.
@@ -64,7 +64,7 @@ public class Ui {
     /**
      * Shows an error to the user.
      *
-     *  @param message Error message to display.
+     * @param message Error message to display.
      */
     public void showError(String message) {
         System.out.println(BAR);
@@ -79,6 +79,11 @@ public class Ui {
         System.out.println(message);
     }
 
+    /**
+     * Shows the tasks matching a search.
+     *
+     * @param tasks Matching tasks to display.
+     */
     public void showTaskMatches(List<Task> tasks) {
         StringBuilder output = new StringBuilder();
         output.append(BAR)

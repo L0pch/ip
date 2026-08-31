@@ -1,10 +1,11 @@
 package gepit;
 
+import java.util.List;
+
 import gepit.parser.Parser;
 import gepit.storage.Storage;
 import gepit.task.Task;
 import gepit.ui.Ui;
-import java.util.List;
 
 /**
  * Runs the Gepit chatbot and coordinates command processing.
@@ -14,6 +15,9 @@ public class Gepit {
     private static final Ui ui = new Ui();
     private static final String BAR =
             "____________________________________________________________";
+
+    private static final String GOT_IT_MESSAGE =
+            BAR + "\n Got it. task added" + "\n     ";
 
     private static TaskList tasks = new TaskList();
     private static final Storage storage =
@@ -153,9 +157,6 @@ public class Gepit {
                 + "\n     " + task
                 + "\n" + BAR;
     }
-
-    private static final String GOT_IT_MESSAGE =
-            BAR + "\n Got it. task added" + "\n     ";
 
     private static String getTaskCountMessage() {
         return "\n " + "Now you have " + tasks.size() + " tasks in the list\n" + BAR;
