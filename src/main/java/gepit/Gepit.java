@@ -75,24 +75,15 @@ public class Gepit {
             }
 
             if (command.equals("delete")) {
-                String argument = Parser.getArgument(input);
-                int taskNumber = Parser.parseTaskNumber(argument);
-                int index = getTaskIndex(taskNumber);
-                return deleteTask(index);
+                return deleteTask(parseTaskIndex(input));
             }
 
             if (command.equals("mark")) {
-                String argument = Parser.getArgument(input);
-                int taskNumber = Parser.parseTaskNumber(argument);
-                int index = getTaskIndex(taskNumber);
-                return markTask(tasks.get(index));
+                return markTask(tasks.get(parseTaskIndex(input)));
             }
 
             if (command.equals("unmark")) {
-                String argument = Parser.getArgument(input);
-                int taskNumber = Parser.parseTaskNumber(argument);
-                int index = getTaskIndex(taskNumber);
-                return unmarkTask(tasks.get(index));
+                return unmarkTask(tasks.get(parseTaskIndex(input)));
             }
 
             if (command.equals("todo")) {
@@ -203,5 +194,11 @@ public class Gepit {
         }
 
         return index;
+    }
+
+    private int parseTaskIndex(String input) throws GepitException {
+        String argument = Parser.getArgument(input);
+        int taskNumber = Parser.parseTaskNumber(argument);
+        return getTaskIndex(taskNumber);
     }
 }
