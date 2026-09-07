@@ -140,6 +140,8 @@ public class Storage {
                     "Invalid date in saved task: " + line);
         }
 
+        assert task != null : "Parsed task must be initialised for a valid task type";
+
         if (doneValue.equals("1")) {
             task.markDone();
         }
