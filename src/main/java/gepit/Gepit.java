@@ -86,6 +86,17 @@ public class Gepit {
                 return unmarkTask(tasks.get(parseTaskIndex(input)));
             }
 
+            if (command.equals("update")) {
+                String argument = Parser.getArgument(input);
+                Parser.UpdateArguments updateArguments =
+                        Parser.parseUpdate(argument);
+                int index = getTaskIndex(updateArguments.taskNumber());
+
+                return updateTask(
+                        tasks.get(index),
+                        updateArguments.description());
+            }
+
             if (command.equals("todo")) {
                 String argument = Parser.getArgument(input);
                 Task task = Parser.parseTodo(argument);
@@ -169,6 +180,15 @@ public class Gepit {
         storage.save(tasks);
 
         return "Get to it soon bruv"
+                + "\n" + task;
+    }
+
+    private String updateTask(Task task, String description)
+            throws GepitException {
+        task.updateDescription(description);
+        storage.save(tasks);
+
+        return "I've changed it up boss:"
                 + "\n" + task;
     }
 
