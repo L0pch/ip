@@ -146,4 +146,36 @@ public class Parser {
                             + "/to 2026-09-11");
         }
     }
+
+    /**
+     * Represents the parsed arguments of an update command.
+     *
+     * @param taskNumber Task number to update.
+     * @param description New task description.
+     */
+    public record UpdateArguments(int taskNumber, String description) {
+    }
+
+    /**
+     * Parses an update command argument.
+     *
+     * @param input Task number followed by the new description.
+     * @return Parsed update arguments.
+     * @throws GepitException If the task number or description is invalid.
+     */
+    public static UpdateArguments parseUpdate(String input)
+            throws GepitException {
+        String[] parts = input.split(" ", 2);
+
+        if (parts.length < 2 || parts[1].isBlank()) {
+            throw new GepitException(
+                    "An update should look like:"
+                            + "\nupdate 1 new description");
+        }
+
+        int taskNumber = parseTaskNumber(parts[0]);
+        String description = parts[1];
+
+        return new UpdateArguments(taskNumber, description);
+    }
 }

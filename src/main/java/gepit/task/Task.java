@@ -4,7 +4,7 @@ package gepit.task;
  * Represents a task that can be marked as done or not done.
  */
 public class Task {
-    private final String description;
+    private String description;
     private boolean isDone;
 
     /**
@@ -39,6 +39,15 @@ public class Task {
 
     public String getDescription() {
         return this.description;
+    }
+
+    /**
+     * Updates the description of this task.
+     *
+     * @param description New task description.
+     */
+    public void updateDescription(String description) {
+        this.description = description;
     }
 
     /**

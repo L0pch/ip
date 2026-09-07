@@ -34,4 +34,14 @@ public class TaskListTest {
 
         assertEquals(0, matches.size());
     }
+
+    @Test
+    void updateDescription_markedTask_preservesMarkedStatus() {
+        Task task = new Todo("old description");
+        task.markDone();
+
+        task.updateDescription("new description");
+
+        assertEquals("[T][X] new description", task.toString());
+    }
 }
