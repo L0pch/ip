@@ -193,6 +193,9 @@ public class Gepit {
                     "Task " + taskNumber + " doesn't exist");
         }
 
+        assert index >= 0 && index < tasks.size()
+                : "Validated task index must be within task list bounds";
+
         return index;
     }
 
